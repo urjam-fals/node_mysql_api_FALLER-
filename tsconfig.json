@@ -6,8 +6,8 @@
     "outDir": "./dist",
     "rootDir": "./",
     "strict": false,
-    "esModuleInterop": true,
     "resolveJsonModule": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
