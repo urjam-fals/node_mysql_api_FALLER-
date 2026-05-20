@@ -1,4 +1,3 @@
-import config from '../../config.json';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -6,6 +5,7 @@ import { Op } from 'sequelize';
 import sendEmail from '../_helpers/send-email';
 import db from '../_helpers/db';
 import Role from '../_helpers/role';
+import loadConfig from '../_helpers/config';
 
 // menu of functions
 export default {
@@ -23,6 +23,8 @@ export default {
     update,
     delete: _delete
 };
+
+const fileConfig = loadConfig();
 
 async function authenticate({ email, password, ipAddress }: any) {
     const account = await db.Account.scope('withHash').findOne({ where: { email } });
@@ -198,7 +200,17 @@ async function hash(password: any) {
 }
 
 function generateJwtToken(account: any) {
-    return jwt.sign({ sub: account.id, id: account.id }, config.secret, { expiresIn: '15m' });
+    return jwt.sign({ sub: account.id, id: account.id }, getJwtSecret(), { expiresIn: '15m' });
+}
+
+function getJwtSecret() {
+    if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET environment variable is required in production');
+    }
+
+    const secret = process.env.JWT_SECRET || fileConfig.secret;
+    if (!secret) throw new Error('JWT secret is missing');
+    return secret;
 }
 
 function generateRefreshToken(account: any, ipAddress: any) {

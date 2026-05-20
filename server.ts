@@ -12,8 +12,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// allow cors requests from any origin and with credentials
-app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
+const corsOrigin = process.env.CORS_ORIGIN;
+
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production'
+        ? (corsOrigin ? corsOrigin.split(',').map(x => x.trim()) : false)
+        : (origin, callback) => callback(null, true),
+    credentials: true
+}));
 
 // api routes
 app.use('/accounts', accountsController);
